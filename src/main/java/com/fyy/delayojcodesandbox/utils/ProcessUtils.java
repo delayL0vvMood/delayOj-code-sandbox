@@ -30,11 +30,12 @@ public class ProcessUtils {
             // 编译失败
             if (exitValue != 0) {
                 System.out.println(onName + "失败, 错误码： "+ exitValue);
+                System.out.println();
                 StringBuilder complieOutputStringBuilder = new StringBuilder();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
                 String complieOutputLine;
                 while ((complieOutputLine = bufferedReader.readLine()) != null) {
-                    complieOutputStringBuilder.append(complieOutputLine);
+                    complieOutputStringBuilder.append(complieOutputLine).append("\n");
                 }
                 executeMessage.setMessage(complieOutputStringBuilder.toString());
 
@@ -42,7 +43,7 @@ public class ProcessUtils {
                 BufferedReader errorBufferedReader = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
                 String errorComplieOutputLine;
                 while ((errorComplieOutputLine = errorBufferedReader.readLine()) != null) {
-                    errorComplieOutputStringBuilder.append(errorComplieOutputLine);
+                    errorComplieOutputStringBuilder.append(errorComplieOutputLine).append("\n");
                 }
                 executeMessage.setErrorMessage(errorComplieOutputStringBuilder.toString());
 
@@ -52,7 +53,7 @@ public class ProcessUtils {
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
                 String complieOutputLine;
                 while ((complieOutputLine = bufferedReader.readLine()) != null) {
-                    complieOutputStringBuilder.append(complieOutputLine);
+                    complieOutputStringBuilder.append(complieOutputLine).append("\n");
                 }
                 executeMessage.setMessage(complieOutputStringBuilder.toString());
             }

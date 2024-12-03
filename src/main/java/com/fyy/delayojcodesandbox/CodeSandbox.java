@@ -9,6 +9,6 @@ public interface CodeSandbox {
     * 执行代码
     * @Param executeCodeRequest 代码执行请求
     * */
-    ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest);
+    ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) throws InterruptedException;
 
 }

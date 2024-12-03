@@ -4,38 +4,60 @@ import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.dfa.FoundWord;
+import cn.hutool.dfa.WordTree;
 import com.fyy.delayojcodesandbox.model.ExecuteCodeRequest;
 import com.fyy.delayojcodesandbox.model.ExecuteCodeResponse;
 import com.fyy.delayojcodesandbox.model.ExecuteMessage;
 import com.fyy.delayojcodesandbox.model.JudgeInfo;
+import com.fyy.delayojcodesandbox.security.DefaultSecurityManager;
+import com.fyy.delayojcodesandbox.security.DenySecurityManager;
+import com.fyy.delayojcodesandbox.security.MySecurityManager;
 import com.fyy.delayojcodesandbox.utils.ProcessUtils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class JavaNativeCodeSandbox implements CodeSandbox {
 
     private static final String GLOBAL_CODE_PATH_NAME = "tempCode";
     private static final String GLOBAL_JAVA_CLASS_NAME = "Main.java";
+    private static final String SECURITY_MANAGER_PATH = "C:\\Users\\fengyaoyang\\IdeaProjects\\delayoj-code-sandbox\\src\\main\\resources\\security";
+    private static final String SECURITY_MANAGER_CLASS_NAME = "MySecurityManager";
+    /*
+    * 设置时间限制，控制代码运行时间
+    * */
+    private static final long TIME_OUT = 5000L;
+
+    /*
+    * 设置黑名单：
+    * 木马程序
+    * */
+    private static final List<String> BLACK_LIST = Arrays.asList("Runtime", "ProcessBuilder", "Process", "ProcessHandle",  "System.err", "System.in", "System.getProperty", "System.getenv", "System.exit", "System.load", "System.loadLibrary", "System.gc", "System.runFinalization", "System.setSecurityManager", "System.getSecurityManager","Files", "exec");
+
+    //初始化字典树
+    private static final WordTree WORD_TREE ;
+    static {
+        WORD_TREE = new WordTree();
+        WORD_TREE.addWords(BLACK_LIST);
+    }
+
+
+
 
     public static void main(String[] args) {
         JavaNativeCodeSandbox javaNativeCodeSandbox = new JavaNativeCodeSandbox();
         ExecuteCodeRequest executeCodeRequest = new ExecuteCodeRequest();
         executeCodeRequest.setLanguage("java");
         String code = ResourceUtil.readStr("testcode/simpleComputeArgs/Main.java", StandardCharsets.UTF_8);
+        //String code = ResourceUtil.readStr("testcode/unsafeCode/RunFileError.java", StandardCharsets.UTF_8);
         executeCodeRequest.setCode(code);
         executeCodeRequest.setInputList(Arrays.asList("1 2" , "3 4" , "5 6"));
         javaNativeCodeSandbox.executeCode(executeCodeRequest);
 
     }
-
-
-
     /*
     *
     * @Param executeCodeRequest 用户传来的数据
@@ -44,12 +66,22 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
 
+        //使用编写的安全管理器
+        //System.setSecurityManager(new MySecurityManager());
         /*
         * 获取用户传来的数据
         * */
         String language = executeCodeRequest.getLanguage();
         String code = executeCodeRequest.getCode();
         List<String> inputList = executeCodeRequest.getInputList();
+
+    /*    //校验代码中是否存在黑名单
+        FoundWord foundWord = WORD_TREE.matchWord(code);
+        if(foundWord != null){
+            System.out.println("包含禁止词  "+foundWord.getFoundWord());
+            return null;
+        }*/
+
 
         /*
         * 1,将用户代码保存为文件
@@ -83,9 +115,19 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         ArrayList<ExecuteMessage> executeMessageList = new ArrayList<>();
         // 输入用例：
         for(String inputArgs : inputList){
-            String runCmd = String.format("java -Dfile.encoding=UTF-8 -cp %s Main %s" , userCodeParentPath, inputArgs);
+            //String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
+            String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s;%s -Djava.security.manager=%s Main %s" , userCodeParentPath,SECURITY_MANAGER_PATH,SECURITY_MANAGER_CLASS_NAME, inputArgs);
+
             try {
                 Process runProcess = Runtime.getRuntime().exec(runCmd);
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(TIME_OUT);
+                        runProcess.destroy();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).start();
                 ExecuteMessage executeMassage = ProcessUtils.runProcessAndGetMessage(runProcess, "运行");
                 System.out.println(executeMassage);
             } catch (Exception e) {
