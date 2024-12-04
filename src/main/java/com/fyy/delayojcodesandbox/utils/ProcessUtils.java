@@ -3,9 +3,12 @@ package com.fyy.delayojcodesandbox.utils;
 
 import cn.hutool.core.util.StrUtil;
 import com.fyy.delayojcodesandbox.model.ExecuteMessage;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StopWatch;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 /*
 * 进程工具类
 * */
@@ -31,31 +34,32 @@ public class ProcessUtils {
             if (exitValue != 0) {
                 System.out.println(onName + "失败, 错误码： "+ exitValue);
                 System.out.println();
-                StringBuilder complieOutputStringBuilder = new StringBuilder();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
+                List<String> complieOutputList = new ArrayList<>();
                 String complieOutputLine;
                 while ((complieOutputLine = bufferedReader.readLine()) != null) {
-                    complieOutputStringBuilder.append(complieOutputLine).append("\n");
+                    complieOutputList.add(complieOutputLine);
                 }
-                executeMessage.setMessage(complieOutputStringBuilder.toString());
+                executeMessage.setMessage(StringUtils.join(complieOutputList, "\n"));
 
-                StringBuilder errorComplieOutputStringBuilder = new StringBuilder();
                 BufferedReader errorBufferedReader = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
+                List<String> errorComplieOutputList = new ArrayList<>();
                 String errorComplieOutputLine;
                 while ((errorComplieOutputLine = errorBufferedReader.readLine()) != null) {
-                    errorComplieOutputStringBuilder.append(errorComplieOutputLine).append("\n");
+                    errorComplieOutputList.add(errorComplieOutputLine);
                 }
-                executeMessage.setErrorMessage(errorComplieOutputStringBuilder.toString());
+                executeMessage.setErrorMessage(StringUtils.join(errorComplieOutputList, "\n"));
 
             } else { // 编译成功
                 System.out.println(onName + "成功");
                 StringBuilder complieOutputStringBuilder = new StringBuilder();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
+                List<String> complieOutputList = new ArrayList<>();
                 String complieOutputLine;
                 while ((complieOutputLine = bufferedReader.readLine()) != null) {
-                    complieOutputStringBuilder.append(complieOutputLine).append("\n");
+                    complieOutputList.add(complieOutputLine);
                 }
-                executeMessage.setMessage(complieOutputStringBuilder.toString());
+                executeMessage.setMessage(StringUtils.join(complieOutputList, "\n"));
             }
             stopWatch.stop();
             executeMessage.setTime(stopWatch.getTotalTimeMillis());
