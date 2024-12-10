@@ -36,7 +36,8 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate  implements C
         //String code = ResourceUtil.readStr("testcode/unsafeCode/RunFileError.java", StandardCharsets.UTF_8);
         executeCodeRequest.setCode(code);
         executeCodeRequest.setInputList(Arrays.asList("1 2" , "3 4" , "5 6"));
-        javaDockerCodeSandbox.executeCode(executeCodeRequest);
+        ExecuteCodeResponse executeCodeResponse = javaDockerCodeSandbox.executeCode(executeCodeRequest);
+        System.out.println(executeCodeResponse);
 
     }
     /*
@@ -121,7 +122,7 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate  implements C
             ExecuteMessage executeMessage = new ExecuteMessage();
             final String[] message = {null};
             final String[] errorMessage = {null};
-            long time = 0;
+            long time = 0l;
 
             String execId = execCreateCmdResponse.getId();
             final boolean[] isTimeOut = {true};
@@ -147,7 +148,7 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate  implements C
                     super.onNext(frame);
                 }
             };
-            final long[] maxMemory = {0};
+            final long[] maxMemory = {0l};
             //获取内存
             StatsCmd statsCmd = dockerClient.statsCmd(containerId);
             ResultCallback<Statistics> statisticsResultCallback = statsCmd.exec(new ResultCallback<Statistics>() {
@@ -180,26 +181,24 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate  implements C
             });
             statsCmd.exec(statisticsResultCallback);
             try {
-                statisticsResultCallback.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            statsCmd.close();
-
-
-            try {
                 stopWatch.start();
                 //执行容器
                 dockerClient
                         .execStartCmd(execId)
                         .exec(execStartResultCallback)
-                        .awaitCompletion(TIME_OUT, TimeUnit.MICROSECONDS);
+                        .awaitCompletion();
                 stopWatch.stop();
                 time = stopWatch.getLastTaskTimeMillis();  //获取上次执行stopWatch的时间
+                statsCmd.close();
             } catch (InterruptedException e) {
                 System.out.println("程序执行异常");
                 throw new RuntimeException(e);
             }
+            /*try {
+                Thread.sleep(10000l);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }*/
             executeMessage.setMessage(message[0]);
             executeMessage.setErrorMessage(errorMessage[0]);
             executeMessage.setTime(time);

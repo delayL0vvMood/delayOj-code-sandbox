@@ -1,5 +1,6 @@
 package com.fyy.delayojcodesandbox.controller;
 
+import com.fyy.delayojcodesandbox.JavaDockerCodeSandbox;
 import com.fyy.delayojcodesandbox.JavaNativeCodeSandbox;
 import com.fyy.delayojcodesandbox.model.ExecuteCodeRequest;
 import com.fyy.delayojcodesandbox.model.ExecuteCodeResponse;
@@ -19,6 +20,9 @@ public class MainController {
     @Resource
     JavaNativeCodeSandbox javaNativeCodeSandbox;
 
+    @Resource
+    JavaDockerCodeSandbox javaDockerCodeSandbox;
+
     @PostMapping("/executeCode")
     ExecuteCodeResponse executeCode(@RequestBody ExecuteCodeRequest executeCodeRequest , HttpServletRequest request , HttpServletResponse response){
         String authHeader = request.getHeader(AUT_REQUEST_HEADER);
@@ -30,7 +34,7 @@ public class MainController {
             throw new RuntimeException("请求参数为空");
         }
         System.out.println(executeCodeRequest.getCode());
-        return javaNativeCodeSandbox.executeCode(executeCodeRequest);
+        return javaDockerCodeSandbox.executeCode(executeCodeRequest);
     }
 
 
