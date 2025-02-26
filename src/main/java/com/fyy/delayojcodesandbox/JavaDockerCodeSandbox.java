@@ -40,8 +40,8 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate  implements C
 
     }
     /*
-    * 设置时间限制，控制代码运行时间
-    * */
+     * 设置时间限制，控制代码运行时间
+     * */
     private static final long TIME_OUT = 5000L;
 
     //初始化开关，第一次启动拉取镜像
@@ -116,6 +116,7 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate  implements C
                     .withAttachStderr(true)
                     .withAttachStdout(true)
                     .exec();
+            System.out.println("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss: " +execCreateCmdResponse);
             System.out.println("创建执行指令: " +execCreateCmdResponse);
 
             ExecuteMessage executeMessage = new ExecuteMessage();

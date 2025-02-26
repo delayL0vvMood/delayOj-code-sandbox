@@ -51,8 +51,7 @@ public class ProcessUtils {
                 executeMessage.setErrorMessage(StringUtils.join(errorComplieOutputList, "\n"));
 
             } else { // 编译成功
-                System.out.println(onName + "成功");
-                StringBuilder complieOutputStringBuilder = new StringBuilder();
+                System.out.println(onName + "成功");;
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
                 List<String> complieOutputList = new ArrayList<>();
                 String complieOutputLine;
@@ -63,6 +62,7 @@ public class ProcessUtils {
             }
             stopWatch.stop();
             executeMessage.setTime(stopWatch.getTotalTimeMillis());
+            executeMessage.setMemory(0l);
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }

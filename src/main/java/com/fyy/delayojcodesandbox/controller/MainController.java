@@ -1,5 +1,6 @@
 package com.fyy.delayojcodesandbox.controller;
 
+import com.fyy.delayojcodesandbox.JavaDockerCodeSandbox;
 import com.fyy.delayojcodesandbox.JavaNativeCodeSandbox;
 import com.fyy.delayojcodesandbox.model.ExecuteCodeRequest;
 import com.fyy.delayojcodesandbox.model.ExecuteCodeResponse;
@@ -18,6 +19,8 @@ public class MainController {
 
     @Resource
     JavaNativeCodeSandbox javaNativeCodeSandbox;
+    @Resource
+    JavaDockerCodeSandbox javaDockerCodeSandbox;
 
     @PostMapping("/executeCode")
     ExecuteCodeResponse executeCode(@RequestBody ExecuteCodeRequest executeCodeRequest , HttpServletRequest request , HttpServletResponse response){
