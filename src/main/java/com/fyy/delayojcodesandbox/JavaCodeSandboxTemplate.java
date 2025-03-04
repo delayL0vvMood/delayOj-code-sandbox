@@ -131,7 +131,6 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox{
                     }
                 }).start();
                 ExecuteMessage executeMassage = ProcessUtils.runProcessAndGetMessage(runProcess, "运行");
-                System.out.println(executeMassage);
                 executeMessageList.add(executeMassage);
             } catch (Exception e) {
                 throw new RuntimeException("程序执行异常"+e);
@@ -147,7 +146,8 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox{
     public ExecuteCodeResponse getOutputResponse(List<ExecuteMessage> executeMessageList ){
         ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
         List<String> outputList = new ArrayList<>();
-        long maxTime = 0; //记录最大时间
+        long maxTime = 0l; //记录最大时间
+        long maxMemory = 0l;
         for(ExecuteMessage executeMessage : executeMessageList){
             String errorMessage = executeMessage.getErrorMessage();
             if(StrUtil.isNotEmpty(errorMessage)){
@@ -159,6 +159,7 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox{
             outputList.add(executeMessage.getMessage());
             if(executeMessage.getTime() != null){
                 maxTime = Math.max(maxTime, executeMessage.getTime());
+                maxMemory = Math.max(maxMemory,executeMessage.getMemory());
             }
         }
         //如果正常执行完
@@ -171,7 +172,7 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox{
         //此处使用时间内存最大值  便于统计后续判题是否超时
         judgeInfo.setTime(maxTime);
         //获取运行内存占用：
-        //judgeInfo.setMemory();
+        judgeInfo.setMemory(maxMemory);
         executeCodeResponse.setJudgeInfo(judgeInfo);
 
         return executeCodeResponse;

@@ -19,6 +19,8 @@ public class MainController {
 
     @Resource
     JavaNativeCodeSandbox javaNativeCodeSandbox;
+    @Resource
+    JavaDockerCodeSandbox javaDockerCodeSandbox;
 
     @Resource
     JavaDockerCodeSandbox javaDockerCodeSandbox;
